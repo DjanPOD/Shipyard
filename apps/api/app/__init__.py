@@ -24,8 +24,9 @@ def create_app(config_object=Config):
     db.init_app(app)
     migrate.init_app(app, db)
 
+    from app import models # noqa: F401
     from app.api import api_v1
-    from app.api import health # noqa: F401
+    from app.api import health, users # noqa: F401
 
     app.register_blueprint(api_v1)
 
