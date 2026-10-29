@@ -5,6 +5,8 @@ from datetime import datetime
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from app.extensions import db
 
 class User(db.Model):
@@ -22,18 +24,23 @@ class User(db.Model):
         String(255),
         unique=True,
         nullable=False,
-        index=True
+        index=True,
+    )
+
+    password_hash: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
     )
 
     display_name: Mapped[str] = mapped_column(
         String(100),
-        nullable=False
+        nullable=False,
     )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        server_default=func.now()
+        server_default=func.now(),
     )
 
     updated_at: Mapped[datetime] = mapped_column(
@@ -42,6 +49,31 @@ class User(db.Model):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+    def set_password(self, password: str):
+        """Validate a new password and store only its hash"""
+
+        if not isinstance(password, str):
+            raise ValueError("Password must be a string.")
+
+        if len(password) < 15:
+            raise ValueError("Password must contain at least 15 characters.")
+
+        if len(password) > 128:
+            raise ValueError("Password must contain at most than 128 characters.")
+
+        self.password_hash = generate_password_hash(
+            password,
+            method="scrypt",
+        )
+
+    def check_password(self, password: str) -> bool:
+        """Check a supplied password against the user's stored hash."""
+
+        if not isinstance(password, str) or not self.password_hash:
+            return False
+
+        return check_password_hash(self.password_hash, password)
 
     def to_dict(self) -> dict[str,object]:
         """Return a JSON-safe representation suitable for API responses"""
