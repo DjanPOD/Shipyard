@@ -1,5 +1,7 @@
 import os
 
+from datetime import timedelta
+
 class Config:
     """Base configuration shared by all environments."""
 
@@ -7,3 +9,5 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
+    JWT_TOKEN_LOCATION = ["headers"]
