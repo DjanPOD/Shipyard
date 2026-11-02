@@ -1,63 +1,44 @@
-import { useEffect, useState } from 'react'
-import { getHealth, type HealthResponse } from './lib/api'
-import { requestFormReset } from 'react-dom';
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-type RequestState = 
-  | {status: "loading"}
-  | {status: "success"; data: HealthResponse}
-  | {status: "error"; message: string};
+import { ProtectedRoute } from "./auth/ProtectedRoute";
+import { AuthPage } from "./pages/AuthPage";
+import { DashboardPage } from "./pages/DashboardPage";
 
-function App(){
-  const [requestState, setRequestState] = useState<RequestState>({
-    status: "loading",
-  });
+function LoginPage() {
+  const location = useLocation();
 
-  useEffect(() => {
-    async function checkApiHealth() {
-      try{
-        const data = await getHealth();
-        setRequestState({status: "success", data});
-      } catch (error){
-        const message =
-          error instanceof Error ? error.message : "Unknown error occurred";
+  const registered =
+    (location.state as { registered?: boolean } | null)?.registered === true;
 
-        setRequestState({ status: "error", message });
-      }
-    }
+  return (
+    <>
+      {registered && (
+        <p role="status" className="notice">
+          Account created. Log in to continue.
+        </p>
+      )}
+      <AuthPage mode="login" />
+    </>
+  );
+}
 
-    void checkApiHealth();
-  }, [])
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-  return(
-  <main className="app-shell">
-    <section className="hero">
-      <p className="eyebrow">Shipyard</p>
-      <h1>Engineering work, releases, and operational clarity.</h1>
-      <p className="description"> Phase 0 is complete when this frontend can successfully communicate with the Flask API.</p>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/register"
+        element={<AuthPage key="register" mode="register" />}
+      />
 
-      <section className='status-card' aria-live='polite'>
-        <h2>API Health</h2>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Route>
 
-        {requestState.status === "loading" && ( 
-          <p className='status loading'>
-            Checking API connection...
-          </p>
-        )}
-
-        {requestState.status === "success" && (
-          <p className="status success">
-            Connected to {requestState.data.serivce}. Status:{" "}{requestState.data.status}.
-          </p>
-        )}
-
-        {requestState.status === "error" && (
-          <p className="status error">
-            API connection failed: {requestState.message}
-          </p>
-        )}
-      </section>
-    </section>
-  </main>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
