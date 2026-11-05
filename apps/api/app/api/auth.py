@@ -8,7 +8,7 @@ from flask_jwt_extended import(
 from app.api import api_v1
 from app.extensions import db
 from app.models.user import User
-from app.service.user_service import(
+from app.services.user_service import(
     InvalidCredentialsError,
     UserAlreadyExistsError,
     UserValidationError,
