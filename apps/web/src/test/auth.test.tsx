@@ -298,6 +298,19 @@ describe("organization flow", () => {
       jsonResponse({ data: organization }),
     );
 
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        data: [
+          {
+            user_id: account.id,
+            email: account.email,
+            display_name: account.display_name,
+            role: "owner",
+          },
+        ],
+      }),
+    );
+
     renderApp();
     const user = await submitLogin();
 
