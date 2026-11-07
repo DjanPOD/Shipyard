@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 
 import { loginAccount } from "../lib/api";
 import { AuthContext, type AuthSession } from "./auth-context";
@@ -15,9 +15,9 @@ export function AuthProvider({ children }: {children: ReactNode}) {
         });
     }
 
-    function logout(): void {
+    const logout = useCallback((): void => {
         setSession(null);
-    }
+    }, []);
 
     return (
         <AuthContext.Provider value={{session, login, logout}}>

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useAuth } from "../auth/useAuth";
 import { ApiError, fetchCurrentUser } from "../lib/api";
+import { Link } from "react-router-dom";
 
 export function DashboardPage() {
   const { session, logout } = useAuth();
@@ -42,7 +43,13 @@ export function DashboardPage() {
         <h1>Hello, {session.user.display_name}</h1>
         <p className="muted">{session.user.email}</p>
 
-        <p>Your account is ready. Projects and organizations come next.</p>
+        <p>
+          Create a team workspace or open an organization you already belong to.
+        </p>
+
+        <p>
+          <Link to="/organizations">Manage organizations</Link>
+        </p>
 
         <div className="actions">
           <button

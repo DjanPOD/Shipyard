@@ -14,9 +14,7 @@ def create_app(config_object=Config):
         app,
         resources={
             r"/api/*": {
-                "origins": [
-                    ["http://localhost:5173"],
-                ]
+                "origins": ["http://localhost:5173"],
             }
         },
     )
