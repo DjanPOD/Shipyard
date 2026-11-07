@@ -10,6 +10,7 @@ from app.services.organization_service import (
     get_organization,
     list_organizations,
 )
+from app.services.membership_service import add_member, list_members
 
 def current_user_id() -> int:
     try:
@@ -101,3 +102,50 @@ def get_organization_detail(organization_id: int):
             }
         }
     ), 200
+
+@api_v1.get("/organizations/<int:organization_id>/members")
+@jwt_required()
+def get_organization_members(organization_id: int):
+    actor_id = current_user_id()
+    rows = list_members(actor_id, organization_id)
+
+    return jsonify(
+        {
+            "data": [
+                {
+                    "user_id": user.id,
+                    "email": user.email,
+                    "display_name": user.display_name,
+                    "role": role,
+                }
+                for user, role in rows
+            ]
+        }
+    ), 200
+
+
+@api_v1.post("/organizations/<int:organization_id>/members")
+@jwt_required()
+def post_organization_member(organization_id: int):
+    actor_id = current_user_id()
+    payload = request.get_json(silent=True)
+
+    if not isinstance(payload, dict):
+        raise OrganizationError(
+            "Request body must be a JSON object.",
+            "INVALID_JSON",
+            400,
+        )
+
+    user, role = add_member(actor_id, organization_id, payload)
+
+    return jsonify(
+        {
+            "data": {
+                "user_id": user.id,
+                "email": user.email,
+                "display_name": user.display_name,
+                "role": role,
+            }
+        }
+    ), 201
