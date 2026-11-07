@@ -3,6 +3,8 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { OrganizationPage } from "./pages/OrganizationPage";
+import { OrganizationsPage } from "./pages/OrganizationsPage";
 
 function LoginPage() {
   const location = useLocation();
@@ -34,7 +36,14 @@ function App() {
       />
 
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/organizations" element={<OrganizationsPage />} />
+          <Route
+            path="/organizations/:organizationId"
+            element={<OrganizationPage />}
+          />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

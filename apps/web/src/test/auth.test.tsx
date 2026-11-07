@@ -244,3 +244,139 @@ describe("authentication flow", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("organization flow", () => {
+  const organization = {
+    id: 12,
+    name: "Shipyard Team",
+    created_at: "2026-11-05T12:00:00+00:00",
+    role: "owner",
+  };
+
+  it("lists the signed-in user's organizations", async () => {
+    mockSuccessfulLogin();
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ data: [organization] }),
+    );
+
+    renderApp();
+    const user = await submitLogin();
+
+    await user.click(
+      await screen.findByRole("link", {
+        name: /manage organizations/i,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("link", { name: "Shipyard Team" }),
+    ).toHaveAttribute("href", "/organizations/12");
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      expect.stringMatching(/\/api\/v1\/organizations$/),
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+  });
+
+  it("creates an organization and opens its workspace", async () => {
+    mockSuccessfulLogin();
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ data: [] }),
+    );
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ data: organization }, 201),
+    );
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ data: organization }),
+    );
+
+    renderApp();
+    const user = await submitLogin();
+
+    await user.click(
+      await screen.findByRole("link", {
+        name: /manage organizations/i,
+      }),
+    );
+
+    await screen.findByText(
+      "You do not belong to any organizations yet.",
+    );
+
+    await user.type(
+      screen.getByLabelText(/organization name/i),
+      organization.name,
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /^create organization$/i,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        name: organization.name,
+      }),
+    ).toBeInTheDocument();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/api\/v1\/organizations$/),
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: organization.name }),
+      },
+    );
+  });
+
+  it("shows a safe message for an inaccessible workspace", async () => {
+    mockSuccessfulLogin();
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ data: [organization] }),
+    );
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Organization not found.",
+          },
+        },
+        404,
+      ),
+    );
+
+    renderApp();
+    const user = await submitLogin();
+
+    await user.click(
+      await screen.findByRole("link", {
+        name: /manage organizations/i,
+      }),
+    );
+
+    await user.click(
+      await screen.findByRole("link", {
+        name: organization.name,
+      }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Organization not found or you do not have access.",
+    );
+  });
+});

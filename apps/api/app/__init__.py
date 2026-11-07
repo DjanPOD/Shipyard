@@ -14,9 +14,7 @@ def create_app(config_object=Config):
         app,
         resources={
             r"/api/*": {
-                "origins": [
-                    ["http://localhost:5173"],
-                ]
+                "origins": ["http://localhost:5173"],
             }
         },
     )
@@ -60,7 +58,7 @@ def create_app(config_object=Config):
 
     from app import models # noqa: F401
     from app.api import api_v1
-    from app.api import health, auth # noqa: F401
+    from app.api import health, auth, organizations # noqa: F401
 
     app.register_blueprint(api_v1)
 
