@@ -8,6 +8,8 @@ import {
   type Organization,
 } from "../lib/api";
 
+import { OrganizationMembers } from "../components/OrganizationMembers"; 
+
 type OrganizationState =
   | { status: "loading" }
   | { status: "success"; organization: Organization }
@@ -115,6 +117,12 @@ function OrganizationWorkspace({ id }: { id: number }) {
                 state.organization.created_at,
               ).toLocaleDateString()}
             </p>
+
+            <OrganizationMembers
+              key={state.organization.id}
+              organizationId={state.organization.id}
+              currentRole={state.organization.role}
+            />
 
             <section aria-labelledby="projects-heading">
               <h2 id="projects-heading">Projects</h2>
