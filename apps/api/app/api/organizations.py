@@ -4,18 +4,10 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api import api_v1
 from app.extensions import db
 from app.models.user import User
-from app.services.organization_service import (
-    OrganizationError,
-    create_organization,
-    get_organization,
-    list_organizations,
-)
+from app.services.issue_service import ( create_issue, get_issue, list_issues, update_issue, )
 from app.services.membership_service import add_member, list_members
-from app.services.project_service import (
-    create_project,
-    get_project,
-    list_projects,
-)
+from app.services.organization_service import ( OrganizationError, create_organization, get_organization, list_organizations,)
+from app.services.project_service import ( create_project, get_project, list_projects,)
 
 def current_user_id() -> int:
     try:
@@ -200,3 +192,101 @@ def get_organization_project(
     )
 
     return jsonify({"data": project.to_dict()}), 200
+
+def issue_request_payload() -> dict:
+    payload = request.get_json(silent=True)
+
+    if not isinstance(payload, dict):
+        raise OrganizationError(
+            "Request body must be a JSON object.",
+            "INVALID_JSON",
+            400,
+        )
+
+    return payload
+
+
+@api_v1.get(
+    "/organizations/<int:organization_id>"
+    "/projects/<int:project_id>/issues"
+)
+@jwt_required()
+def get_project_issues(
+    organization_id: int,
+    project_id: int,
+):
+    issues = list_issues(
+        current_user_id(),
+        organization_id,
+        project_id,
+    )
+
+    return jsonify({
+        "data": [issue.to_dict() for issue in issues],
+    }), 200
+
+
+@api_v1.post(
+    "/organizations/<int:organization_id>"
+    "/projects/<int:project_id>/issues"
+)
+@jwt_required()
+def post_project_issue(
+    organization_id: int,
+    project_id: int,
+):
+    actor_id = current_user_id()
+    payload = issue_request_payload()
+
+    issue = create_issue(
+        actor_id,
+        organization_id,
+        project_id,
+        payload,
+    )
+
+    return jsonify({"data": issue.to_dict()}), 201
+
+
+@api_v1.get(
+    "/organizations/<int:organization_id>"
+    "/projects/<int:project_id>/issues/<int:issue_id>"
+)
+@jwt_required()
+def get_project_issue(
+    organization_id: int,
+    project_id: int,
+    issue_id: int,
+):
+    issue = get_issue(
+        current_user_id(),
+        organization_id,
+        project_id,
+        issue_id,
+    )
+
+    return jsonify({"data": issue.to_dict()}), 200
+
+
+@api_v1.patch(
+    "/organizations/<int:organization_id>"
+    "/projects/<int:project_id>/issues/<int:issue_id>"
+)
+@jwt_required()
+def patch_project_issue(
+    organization_id: int,
+    project_id: int,
+    issue_id: int,
+):
+    actor_id = current_user_id()
+    payload = issue_request_payload()
+
+    issue = update_issue(
+        actor_id,
+        organization_id,
+        project_id,
+        issue_id,
+        payload,
+    )
+
+    return jsonify({"data": issue.to_dict()}), 200
