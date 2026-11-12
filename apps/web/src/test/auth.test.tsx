@@ -311,6 +311,10 @@ describe("organization flow", () => {
       }),
     );
 
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ data: [] }),
+    );
+
     renderApp();
     const user = await submitLogin();
 
