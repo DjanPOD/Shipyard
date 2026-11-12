@@ -152,6 +152,7 @@ export function OrganizationsPage() {
                     <Link to={`/organizations/${organization.id}`}>
                       {organization.name}
                     </Link>
+                    {" "}
                     <span className="role-badge">
                       {organization.role}
                     </span>

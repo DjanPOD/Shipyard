@@ -5,6 +5,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { OrganizationPage } from "./pages/OrganizationPage";
 import { OrganizationsPage } from "./pages/OrganizationsPage";
+import { ProjectPage } from "./pages/ProjectPage";
 
 function LoginPage() {
   const location = useLocation();
@@ -39,10 +40,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/organizations" element={<OrganizationsPage />} />
-          <Route
-            path="/organizations/:organizationId"
-            element={<OrganizationPage />}
-          />
+          <Route path="/organizations/:organizationId" element={<OrganizationPage />} />
+          <Route path="/organizations/:organizationId/projects/:projectId" element={<ProjectPage />} />
         </Route>
       </Route>
 

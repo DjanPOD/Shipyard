@@ -8,7 +8,8 @@ import {
   type Organization,
 } from "../lib/api";
 
-import { OrganizationMembers } from "../components/OrganizationMembers"; 
+import { OrganizationMembers } from "../components/OrganizationMembers";
+import { OrganizationProjects } from "../components/OrganizationProjects"; 
 
 type OrganizationState =
   | { status: "loading" }
@@ -124,10 +125,11 @@ function OrganizationWorkspace({ id }: { id: number }) {
               currentRole={state.organization.role}
             />
 
-            <section aria-labelledby="projects-heading">
-              <h2 id="projects-heading">Projects</h2>
-              <p>Project management is coming in the next feature.</p>
-            </section>
+            <OrganizationProjects
+              key={state.organization.id}
+              organizationId={state.organization.id}
+              currentRole={state.organization.role}
+            />
           </>
         )}
       </section>

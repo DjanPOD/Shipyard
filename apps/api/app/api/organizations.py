@@ -11,6 +11,11 @@ from app.services.organization_service import (
     list_organizations,
 )
 from app.services.membership_service import add_member, list_members
+from app.services.project_service import (
+    create_project,
+    get_project,
+    list_projects,
+)
 
 def current_user_id() -> int:
     try:
@@ -149,3 +154,49 @@ def post_organization_member(organization_id: int):
             }
         }
     ), 201
+
+@api_v1.get("/organizations/<int:organization_id>/projects")
+@jwt_required()
+def get_organization_projects(organization_id: int):
+    projects = list_projects(current_user_id(), organization_id)
+
+    return jsonify(
+        {
+            "data": [project.to_dict() for project in projects],
+        }
+    ), 200
+
+
+@api_v1.post("/organizations/<int:organization_id>/projects")
+@jwt_required()
+def post_organization_project(organization_id: int):
+    actor_id = current_user_id()
+    payload = request.get_json(silent=True)
+
+    if not isinstance(payload, dict):
+        raise OrganizationError(
+            "Request body must be a JSON object.",
+            "INVALID_JSON",
+            400,
+        )
+
+    project = create_project(actor_id, organization_id, payload)
+
+    return jsonify({"data": project.to_dict()}), 201
+
+
+@api_v1.get(
+    "/organizations/<int:organization_id>/projects/<int:project_id>"
+)
+@jwt_required()
+def get_organization_project(
+    organization_id: int,
+    project_id: int,
+):
+    project = get_project(
+        current_user_id(),
+        organization_id,
+        project_id,
+    )
+
+    return jsonify({"data": project.to_dict()}), 200
